@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="來源檔案">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="標頭檔">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="資源檔">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>資源檔</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\Turn.h">
+      <Filter>資源檔</Filter>
+    </ClInclude>
+    <ClInclude Include="source\naki.h">
+      <Filter>資源檔</Filter>
+    </ClInclude>
+    <ClInclude Include="source\chi_more_than_two.h">
+      <Filter>資源檔</Filter>
+    </ClInclude>
+    <ClInclude Include="source\player.h">
+      <Filter>資源檔</Filter>
+    </ClInclude>
+    <ClInclude Include="source\score.h">
+      <Filter>資源檔</Filter>
+    </ClInclude>
+    <ClInclude Include="source\tile.h">
+      <Filter>資源檔</Filter>
+    </ClInclude>
+    <ClInclude Include="source\win_check.h">
+      <Filter>資源檔</Filter>
+    </ClInclude>
+    <ClInclude Include="source\wall.h">
+      <Filter>資源檔</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="image\1m.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\1z.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\2m.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\2z.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\3m.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\3z.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\4m.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\4z.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\5m.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\5z.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\5z_blank.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\6m.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\6z.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\7m.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\7z.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\8m.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\9m.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\arrow-down.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\arrow-up.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\chi.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\empty140x140.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\empty140x200.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\empty280x140.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\kong.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\pong.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\realempty.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\ron.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\skip.png">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="image\tsumo.png">
+      <Filter>資源檔</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="font\msjhbd.ttc">
+      <Filter>資源檔</Filter>
+    </None>
+  </ItemGroup>
+</Project>
