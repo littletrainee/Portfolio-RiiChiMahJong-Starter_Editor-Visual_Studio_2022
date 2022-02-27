@@ -19,7 +19,7 @@ class CheckWin {
     // set hand
     this->hand = mainplayer.hand;
     // set group count
-    this->number_of_groups = static_cast<int>(mainplayer.meld.size());
+    this->number_of_groups = mainplayer.meldorder;
     // #1 = recheck meld, #2 = not meld and not empty, #3 = empty
     int check_combined = 1;
     std::string temptile;

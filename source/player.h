@@ -7,7 +7,10 @@
 #include <string>
 #include <vector>
 
+#include "meld.h"
+#include "naki.h"
 #include "tile.h"
+#include "wall.h"
 
 class Player {
  public:
@@ -16,12 +19,13 @@ class Player {
   bool concealed = true;
   bool bookmaker = false;
   int code = -1;
+  int meldorder = 0;
   int score = 45000;
   std::string name = "";
   std::vector<std::string> hand;
   std::vector<std::string> river;
-  std::vector<std::vector<std::string>> meld;
   std::vector<sf::Vector2f> position;
+  Meld meld1, meld2, meld3, meld4;
 
   // set player hand and river scale function
   void SetHand_MeldAndRiverScale(float f) {
@@ -41,14 +45,10 @@ class Player {
     this->tile13.setScale(f, f);
     this->tile14.setScale(f, f);
     // meld
-    this->meld11.setScale(f, f);
-    this->meld12.setScale(f, f);
-    this->meld13.setScale(f, f);
-    this->meld14.setScale(f, f);
-    this->meld21.setScale(f, f);
-    this->meld22.setScale(f, f);
-    this->meld23.setScale(f, f);
-    this->meld24.setScale(f, f);
+    this->meld1.SetScale(f);
+    this->meld2.SetScale(f);
+    this->meld3.SetScale(f);
+    this->meld4.SetScale(f);
     // river
     this->river1.setScale(f, f);
     this->river2.setScale(f, f);
@@ -130,17 +130,18 @@ class Player {
       this->river19.setPosition(riverx + 192, rivery + 126);
       this->river20.setPosition(riverx + 224, rivery + 126);
       // set meld position (750,530)
-      this->meld11.setPosition(meldx, meldy + 40);
-      this->meld12.setPosition(meldx - 29, meldy);
-      this->meld13.setPosition(meldx + 41, meldy);
-      this->meld14.setPosition(meldx - 58, meldy);
-      this->meld21.setPosition(meldx, meldy - 5);
-      this->meld22.setPosition(meldx - 29, meldy - 45);
-      this->meld23.setPosition(meldx + 41, meldy - 45);
-      this->meld24.setPosition(meldx - 58, meldy - 45);
-      // meld rotate
-      this->meld11.setRotation(-90);
-      this->meld21.setRotation(-90);
+      /*
+   this->meld11.setPosition(meldx, meldy + 40);
+   this->meld12.setPosition(meldx - 29, meldy);
+   this->meld13.setPosition(meldx + 41, meldy);
+   this->meld14.setPosition(meldx - 58, meldy);
+   this->meld21.setPosition(meldx, meldy - 5);
+   this->meld22.setPosition(meldx - 29, meldy - 45);
+   this->meld23.setPosition(meldx + 41, meldy - 45);
+   this->meld24.setPosition(meldx - 58, meldy - 45);
+   // meld rotate
+   this->meld11.setRotation(-90);
+   this->meld21.setRotation(-90);*/
       // player2
     } else if (this->code == 1) {
       // hand position
@@ -216,6 +217,13 @@ class Player {
       this->river19.setRotation(180);
       this->river20.setRotation(180);
     }
+  };
+  // set meld original position function
+  void SetMeldOriginalPosition(float x, float y) {
+    this->meld1.OriginalAndConcealedKangPosition(x, y);
+    this->meld2.OriginalAndConcealedKangPosition(x, y - 45);
+    this->meld3.OriginalAndConcealedKangPosition(x, y - 90);
+    this->meld4.OriginalAndConcealedKangPosition(x, y - 135);
   };
 
   // set player texture function
@@ -402,39 +410,10 @@ class Player {
     ///////////////////////////////////////////////////////////////////////////
     /////////////////////////////// meld //////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////
-    // meld 1
-    if (!this->meld.empty()) {
-      t.SwitchTexture(this->meld[0][0], this->meld11);
-      t.SwitchTexture(this->meld[0][1], this->meld12);
-      t.SwitchTexture(this->meld[0][2], this->meld13);
-      if (this->meld[0].size() > 3)
-        t.SwitchTexture(this->meld[0][3], this->meld14);
-      else
-        t.SwitchTexture(blank, this->meld14);
-      if (this->meld.size() > 1) {
-        t.SwitchTexture(this->meld[1][0], this->meld21);
-        t.SwitchTexture(this->meld[1][1], this->meld22);
-        t.SwitchTexture(this->meld[1][2], this->meld23);
-        if (this->meld[1].size() > 3)
-          t.SwitchTexture(this->meld[1][3], this->meld24);
-        else
-          t.SwitchTexture(blank, this->meld24);
-      } else {
-        t.SwitchTexture(blank, this->meld21);
-        t.SwitchTexture(blank, this->meld22);
-        t.SwitchTexture(blank, this->meld23);
-        t.SwitchTexture(blank, this->meld24);
-      }
-    } else {
-      t.SwitchTexture(blank, this->meld11);
-      t.SwitchTexture(blank, this->meld12);
-      t.SwitchTexture(blank, this->meld13);
-      t.SwitchTexture(blank, this->meld14);
-      t.SwitchTexture(blank, this->meld21);
-      t.SwitchTexture(blank, this->meld22);
-      t.SwitchTexture(blank, this->meld23);
-      t.SwitchTexture(blank, this->meld24);
-    }
+    this->meld1.SetTexture(t);
+    this->meld2.SetTexture(t);
+    this->meld3.SetTexture(t);
+    this->meld4.SetTexture(t);
   }
 
   // choose hightlight function
@@ -596,6 +575,48 @@ class Player {
                    1]);
     this->hand.erase(this->hand.begin() + player_select - 1);
   }
+  // switch order to meld function
+  void SwitchOrderToMeld(std::vector<std::string> tempmeld,
+                         std::string typeofnaki) {
+    // switch meldorder number
+    switch (this->meldorder) {
+        // number = 0
+      case 0:
+        this->meld1.hand = tempmeld;
+        this->meld1.typeofnaki = typeofnaki;
+        if (this->meld1.typeofnaki == "chi" ||
+            this->meld1.typeofnaki == "pong" || this->meld1.typeofnaki == "big")
+          this->meld1.ChiPongAndBigKangPosition();
+        break;
+        // number = 1
+      case 1:
+        this->meld2.hand = tempmeld;
+        this->meld2.typeofnaki = typeofnaki;
+        if (this->meld2.typeofnaki == "chi" ||
+            this->meld2.typeofnaki == "pong" || this->meld2.typeofnaki == "big")
+          this->meld2.ChiPongAndBigKangPosition();
+        break;
+        // number = 2
+      case 2:
+        this->meld3.hand = tempmeld;
+        this->meld3.typeofnaki = typeofnaki;
+        if (this->meld3.typeofnaki == "chi" ||
+            this->meld3.typeofnaki == "pong" || this->meld3.typeofnaki == "big")
+          this->meld3.ChiPongAndBigKangPosition();
+        break;
+        // number =3
+      case 3:
+        this->meld4.hand = tempmeld;
+        this->meld4.typeofnaki = typeofnaki;
+        if (this->meld4.typeofnaki == "chi" ||
+            this->meld4.typeofnaki == "pong" || this->meld4.typeofnaki == "big")
+          this->meld4.ChiPongAndBigKangPosition();
+        break;
+    }
+
+    // this->meldorder +1
+    this->meldorder++;
+  };
 
   // make chi combined function
   void Chi_Combined(std::vector<std::string> targetmeld,
@@ -612,8 +633,8 @@ class Player {
           std::find(this->hand.begin(), this->hand.end(), targetmeld[i]));
     }
 
-    // append tempmeld to meld
-    this->meld.push_back(tempmeld);
+    // append tempmeld to this->meld1~4
+    SwitchOrderToMeld(tempmeld, "chi");
   };
 
   // make pong combined function
@@ -628,26 +649,24 @@ class Player {
                                  otherplayerriver.back()));
     // erase other player river last
     otherplayerriver.pop_back();
-    // append tempmeld to meld
-    this->meld.push_back(tempmeld);
+    // append tempmeld to this->meld1~4
+    SwitchOrderToMeld(tempmeld, "pong");
   };
 
   // draw wall tail top or button
-  void DrawWallTailTile(bool &walltailtop, std::vector<std::string> &wallhand) {
-    if (walltailtop) {
-      this->hand.push_back(*(wallhand.rbegin() + 1));
-      wallhand.erase(wallhand.end() - 2);
+  void DrawWallTailTile(Wall &wall) {
+    if (wall.walltailtop) {
+      this->hand.push_back(*(wall.hand.rbegin() + 1));
+      wall.hand.erase(wall.hand.end() - 2);
     } else {
-      this->hand.push_back(wallhand.back());
-      wallhand.erase(wallhand.end());
+      this->hand.push_back(wall.hand.back());
+      wall.hand.erase(wall.hand.end());
     }
-    walltailtop = !walltailtop;
+    wall.walltailtop = !wall.walltailtop;
   };
 
   // make kang combined function
-  void Big_Kang_Combined(std::vector<std::string> &otherplayerriver,
-                         std::vector<std::string> &wallhand,
-                         bool &walltailtop) {
+  void BigKangCombined(std::vector<std::string> &otherplayerriver, Wall &wall) {
     // declare
     std::vector<std::string> tempmeld;
     // append target to tempmeld four time
@@ -658,12 +677,50 @@ class Player {
                                  otherplayerriver.back()));
     // erase other player river last
     otherplayerriver.pop_back();
-    // append tempmeld to meld
-    this->meld.push_back(tempmeld);
+    // append tempmeld to this->meld1~4
+    SwitchOrderToMeld(tempmeld, "big");
     // append wall tail tile to hand
-    DrawWallTailTile(walltailtop, wallhand);
+    DrawWallTailTile(wall);
   };
 
+  // make concealed combined function
+  void ConcealedKangCombined(std::string themeldone, Wall &wall) {
+    // declare
+    std::vector<std::string> tempmeld;
+    for (int i = 0; i < 4; i++) {
+      tempmeld.push_back(themeldone);
+      this->hand.erase(
+          std::find(this->hand.begin(), this->hand.end(), themeldone));
+    }
+    SwitchOrderToMeld(tempmeld, "concealed");
+    DrawWallTailTile(wall);
+  };
+
+  // make small conbinde function
+  void SmallKangCombined(std::string themeldone, int whitchmeld, Wall &wall) {
+    std::vector<std::string> tempmeld;
+    switch (whitchmeld) {
+      case 1:
+        this->meld1.hand.push_back(themeldone);
+        this->meld1.typeofnaki = "small";
+        break;
+      case 2:
+        this->meld2.hand.push_back(themeldone);
+        this->meld2.typeofnaki = "small";
+        break;
+      case 3:
+        this->meld3.hand.push_back(themeldone);
+        this->meld3.typeofnaki = "small";
+        break;
+      case 4:
+        this->meld4.hand.push_back(themeldone);
+        this->meld4.typeofnaki = "small";
+        break;
+    }
+    this->hand.erase(
+        std::find(this->hand.begin(), this->hand.end(), themeldone));
+    DrawWallTailTile(wall);
+  };
   // window.draw function
   void Player_Window_Draw(sf::RenderWindow &window) {
     // hand
@@ -702,14 +759,11 @@ class Player {
     window.draw(this->river18);
     window.draw(this->river19);
     window.draw(this->river20);
-    window.draw(this->meld11);
-    window.draw(this->meld12);
-    window.draw(this->meld13);
-    window.draw(this->meld14);
-    window.draw(this->meld21);
-    window.draw(this->meld22);
-    window.draw(this->meld23);
-    window.draw(this->meld24);
+    // meld1
+    this->meld1.Meld_Window_Draw(window);
+    this->meld2.Meld_Window_Draw(window);
+    this->meld3.Meld_Window_Draw(window);
+    this->meld4.Meld_Window_Draw(window);
   }
 
  private:
@@ -728,17 +782,6 @@ class Player {
   sf::Sprite tile12;
   sf::Sprite tile13;
   sf::Sprite tile14;
-  // meld sprite
-  // meld1
-  sf::Sprite meld11;
-  sf::Sprite meld12;
-  sf::Sprite meld13;
-  sf::Sprite meld14;
-  // meld2
-  sf::Sprite meld21;
-  sf::Sprite meld22;
-  sf::Sprite meld23;
-  sf::Sprite meld24;
 
   // river sprite
   sf::Sprite river1;

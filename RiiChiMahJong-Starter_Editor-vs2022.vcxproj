@@ -148,6 +148,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\meld.h" />
     <ClInclude Include="source\Turn.h" />
     <ClInclude Include="source\naki.h" />
     <ClInclude Include="source\chi_more_than_two.h" />

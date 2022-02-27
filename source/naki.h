@@ -6,14 +6,16 @@
 #include <utility>
 #include <vector>
 
-#include "wall.h"
 #include "player.h"
+#include "wall.h"
 
 class Naki {
  public:
   // delcare
   std::vector<std::vector<std::string>> probablysequence;
   bool hascombined = false;
+  std::string themeldone;
+  int whitchmeld = 0;
   // load naki texture
   void LoadNakiImg() {
     this->chi_texture.loadFromFile("image/chi.png");
@@ -43,8 +45,8 @@ class Naki {
     window.draw(this->kang_sprite);
     window.draw(this->skip_sprite);
   };
-  // check combined in hand function
-  void Check(std::vector<std::string> river, Player &player) {
+  // check chi, pong and big kang combined in hand function
+  void CheckChiPongBigKang(std::vector<std::string> river, Player &player) {
     this->riverlastone = river.back();
     this->hand = player.hand;
     // call CheckTripleAndQuadruple function
@@ -55,17 +57,69 @@ class Naki {
     else
       this->hascombined = false;
   };
+  // check small and concealed kang function
+  int CheckSmallAndConcealedKang(Player &player) {
+    for (std::vector<std::string>::iterator target = player.hand.begin();
+         target != player.hand.end(); target++) {
+      // check concealed kang
+      if (std::count(player.hand.begin(), player.hand.end(), *target) == 4) {
+        this->quadruple = true;
+        this->themeldone = *target;
+        return 2;
+        // check small kang
+      } else {
+        // meld1
+        if (player.meld1.hand.size() != 0 &&
+            std::count(player.meld1.hand.begin(), player.meld1.hand.end(),
+                       *target) == 3) {
+          this->quadruple = true;
+          this->themeldone = *target;
+          this->whitchmeld = 1;
+          return 3;
+        // meld2
+        } else if (player.meld2.hand.size() != 0 &&
+                   std::count(player.meld2.hand.begin(),
+                              player.meld2.hand.end(), *target) == 3) {
+          this->quadruple = true;
+          this->themeldone = *target;
+          this->whitchmeld = 2;
+          return 3;
+        // meld3
+        } else if (player.meld3.hand.size() != 0 &&
+                   std::count(player.meld3.hand.begin(),
+                              player.meld3.hand.end(), *target) == 3) {
+          this->quadruple = true;
+          this->themeldone = *target;
+          this->whitchmeld = 3;
+          return 3;
+        // meld4
+        } else if (player.meld4.hand.size() != 0 &&
+                   std::count(player.meld4.hand.begin(),
+                              player.meld4.hand.end(), *target) == 3) {
+          this->quadruple = true;
+          this->themeldone = *target;
+          this->whitchmeld = 4;
+          return 3;
+        }
+      }
+    }
+    return 0;
+  };
   // select naki function
   int Select(sf::Vector2i &mousepos) {
+    // chi
     if (!this->probablysequence.empty() && mousepos.x > 650 &&
         mousepos.x < 692 && mousepos.y > 100 && mousepos.y < 142)
       return 1;
+    // pong
     if (this->triple && mousepos.x > 700 && mousepos.x < 742 &&
         mousepos.y > 100 && mousepos.y < 142)
       return 2;
+    // big kang
     if (this->quadruple && mousepos.x > 650 && mousepos.x < 692 &&
         mousepos.y > 150 && mousepos.y < 192)
       return 3;
+    // skip
     if (!this->probablysequence.empty() || this->triple ||
         this->quadruple && mousepos.x > 700 && mousepos.x < 742 &&
             mousepos.y > 150 && mousepos.y < 192)
@@ -102,6 +156,7 @@ class Naki {
     this->probablysequence.clear();
     this->triple = false;
     this->quadruple = false;
+    this->themeldone.clear();
   };
 
  private:

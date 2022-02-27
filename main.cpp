@@ -9,6 +9,7 @@
 
 #include "source/Turn.h"
 #include "source/chi_more_than_two.h"
+#include "source/meld.h"
 #include "source/naki.h"
 #include "source/player.h"
 #include "source/tile.h"
@@ -43,7 +44,7 @@ void SetUp(Player &player1, Player &player2, Wall &wall,
 
 void Window_Draw_all(sf::RenderWindow &window, Player &player1, Player &player2,
                      Turn &turn, Naki &naki, Chi_More_Than_Two &cmtt,
-                     sf::Text &tex) {
+                     sf::Text &countdowntimer) {
   // clear window
   window.clear(sf::Color::White);
   player1.Player_Window_Draw(window);
@@ -51,7 +52,7 @@ void Window_Draw_all(sf::RenderWindow &window, Player &player1, Player &player2,
   turn.WindowDraw(window);
   naki.Naki_Window_Draw(window);
   cmtt.Chi_Window_Draw(window);
-  window.draw(tex);
+  window.draw(countdowntimer);
   // window dispalyr
   window.display();
 }
@@ -64,7 +65,10 @@ int main() {
   float tilescale = 0.2f;
   float duration = 1.0f;
   // int
-  int player_select = 0;
+  int whitch_one_discard = 0;
+  int naki_select = 0;  // #-1 = pass, #1 = chi, #2 = pong, #3 = kang
+  int chi_select = 0;   // #1 first, #2 = second, #3 = third
+  int kang_type = 0;    // #1 = big, #2 = concealed, #3 = small
   // #-1 = off game, #0 = discard, #1 = waiting period after discard,
   // #2 = check win or naki, #3 = naki select, #4 = chi more than two,
   // #5 = make combined
@@ -84,14 +88,16 @@ int main() {
   sf::Time countdowntime;
   // font
   sf::Font font;
-  sf::Text tex;
+  sf::Text countdowntimer;
   font.loadFromFile("./font/msjhbd.ttc");
-  tex.setFont(font);
-  tex.setCharacterSize(20);
-  tex.setFillColor(sf::Color::Black);
-  tex.setStyle(sf::Text::Bold);
+  countdowntimer.setFont(font);
+  countdowntimer.setCharacterSize(20);
+  countdowntimer.setFillColor(sf::Color::Black);
+  countdowntimer.setStyle(sf::Text::Bold);
   // sf::RenderWindow
-  sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!");
+  sf::RenderWindow window(sf::VideoMode(800, 600),
+                          "RiiChi MahJong Two Player Version For Bigginer",
+                          sf::Style::Close);
   // struct and class
   Wall wall;
   Tile tile;
@@ -116,20 +122,37 @@ int main() {
   player2.name = "player2";
   player1.bookmaker = true;
   // set up player and wall
-  SetUp(player1, player2, wall, sortby);
+  // SetUp(player1, player2, wall, sortby);
+  ////////////////////// test data ////////////////////////////////////////////
+  /*   */ player1.hand = {"2m", "2m", "2m", "3m", "3m", "3m",
+                          "4m", "4m", "4m", "5m", "5m"};
+  /*   */ player1.meld1.hand = {"1m", "1m", "1m"};
+  /*   */ player1.river = {"3z", "3z", "4z"};
+  /*   */ player1.meldorder = 1;
+  /*   */ player2.hand = {"6m", "6m", "6m", "7m", "7m", "7m", "8m",
+                          "8m", "8m", "9m", "9m", "9m", "1z"};
+  /*   */ player2.river = {"2z", "2z"};
+  /*   */ wall.hand = {"2z", "1m", "3m", "5m", "6z"};
+  /*   */
+  /*   */
+  /*   */
   // set player hand, river and naki Scale, Position, Rotation and Texture
   player1.SetHand_MeldAndRiverScale(tilescale);
   player2.SetHand_MeldAndRiverScale(tilescale);
-  naki.SetNakiScale(tilescale+0.1f);
+  naki.SetNakiScale(tilescale + 0.1f);
   player1.SetHand_MeldAndRiverPositionAndRotation(175, 530, 175, 325, 710, 530);
+  player1.SetMeldOriginalPosition(710, 530);
   player2.SetHand_MeldAndRiverPositionAndRotation(203, 50, 175, 300, 150, 50);
   turn.SetArrowScaleAndPosition(tilescale + 0.3f, 175, 250);
   naki.SetNakiPosition(650, 100);
   player1.SetPlayerTexture(tile);
   player2.SetPlayerTexture(tile);
-
-  if (cw.Win(player1, player2)) state = -1;
-
+  // check win(tsumo)
+  // if (cw.Win(player1, player2)) {
+  //  state = -1;
+  //  // no win(tsumo) then check kang
+  //} else {
+  //}
   while (window.isOpen()) {
     countdowntime = clock.restart();
     while (window.pollEvent(event)) {
@@ -146,82 +169,88 @@ int main() {
               case 0:
                 // player1
                 if (turn.turn == 0) {
-                  player_select = player1.Select(mousepos);
-                  if (player_select != 0) {
-                    player1.DisCardFromHandToRiver(player_select);
+                  // reset whitch_one_discard
+                  whitch_one_discard = 0;
+                  // select whitch one
+                  whitch_one_discard = player1.Select(mousepos);
+                  // player1 is select
+                  if (whitch_one_discard > 0) {
+                    player1.DisCardFromHandToRiver(whitch_one_discard);
                     Sort(sortby, player1.hand);
                     player1.SetHand_MeldAndRiverPositionAndRotation(
                         175, 530, 175, 325, 710, 530);
                     player1.SetPlayerTexture(tile);
                     state = 1;
                     Window_Draw_all(window, player1, player2, turn, naki, cmtt,
-                                    tex);
+                                    countdowntimer);
                   }
                 }
                 break;
               // naki select
               case 3:
                 if (turn.turn == 1) {
-                  player_select = naki.Select(mousepos);
+                  // reset naki_select
+                  naki_select = 0;
+                  naki_select = naki.Select(mousepos);
                   // player select chi, pong or kang
-                  if (player_select != -1) {
-                    switch (player_select) {
-                      // chi
-                      case 1:
-                        // more than one
-                        if (naki.probablysequence.size() > 1) {
-                          // set state to 4(chi more than two)
-                          state = 4;
-                          // reset player_select
-                          player_select = 0;
-                          // set chi more than two scale ,position and texture
-                          cmtt.SetScaleAndPosition(tilescale);
-                          cmtt.SetChiTexture(tile, naki.probablysequence);
-                          Window_Draw_all(window, player1, player2, turn, naki,
-                                          cmtt, tex);
-                        } else {
-                          // set state to 5 (make combined)
-                          state = 5;
-                        }
-                        break;
-                      // pong
-                      case 2:
+                  switch (naki_select) {
+                    case 1:
+                      // more than one
+                      if (naki.probablysequence.size() > 1) {
+                        // set state to 4(chi more than two)
+                        state = 4;
+                        // set chi more than two scale ,position and texture
+                        cmtt.SetScaleAndPosition(tilescale);
+                        cmtt.SetChiTexture(tile, naki.probablysequence);
+                        Window_Draw_all(window, player1, player2, turn, naki,
+                                        cmtt, countdowntimer);
+                      } else {
+                        // set state to 5 (make combined)
                         state = 5;
-                        break;
-                      // kang
-                      case 3:
-                        state = 5;
-                        break;
-                    }
-
-                    // player skip combined
-                  } else {
-                    // reset naki
-                    naki.ClearNaki();
-                    // set naki texture
-                    naki.SetNakiTextureShow();
-                    // player1 draw card
-                    wall.DrawCard(player1.hand);
-                    if (cw.Win(player1,player2)) state = -1;
-                    // set texture
-                    player1.SetPlayerTexture(tile);
-                    // set gameturn = 0
-                    turn.turn--;
-                    // set state to 0(discard)
-                    state = 0;
-                    Window_Draw_all(window, player1, player2, turn, naki, cmtt,
-                                    tex);
+                      }
+                      break;
+                    case 2:  // pong
+                      state = 5;
+                      break;
+                    case 3:  // kang
+                      state = 5;
+                      if (kang_type == 0)
+                      kang_type = 1;
+                      break;
+                    case -1:
+                      // reset naki
+                      naki.ClearNaki();
+                      // set naki texture
+                      naki.SetNakiTextureShow();
+                      // player1 draw card
+                      wall.DrawCard(player1.hand);
+                      // check is win(ron)
+                      if (cw.Win(player1, player2))
+                        state = -1;
+                      else {
+                        // set texture
+                        player1.SetPlayerTexture(tile);
+                        // set gameturn = 0
+                        turn.turn--;
+                        // set state to 0(discard)
+                        state = 0;
+                      }
+                      Window_Draw_all(window, player1, player2, turn, naki,
+                                      cmtt, countdowntimer);
+                      break;
                   }
                 }
                 break;
+              // chi more than two
               case 4:
-                player_select = cmtt.Select(mousepos, naki.probablysequence);
+                // reset chi_select
+                chi_select = 0;
+                // player select one from mutiple choice to chi
+                chi_select = cmtt.Select(mousepos, naki.probablysequence);
                 state = 5;
                 break;
             }
           }
-          break;
-        default:  // no mouse click and not quite game
           break;
       }
     }
@@ -233,12 +262,15 @@ int main() {
         if (turn.turn == 0) player1.ChooseHighLightOrNot(mousepos);
         // player2 discard
         else if (turn.turn == 1) {
-          player_select = static_cast<int>(player2.hand.size());
-          player2.DisCardFromHandToRiver(player_select);
+          // reset whitch_one_discard
+          whitch_one_discard = 0;
+          whitch_one_discard = static_cast<int>(player2.hand.size());
+          player2.DisCardFromHandToRiver(whitch_one_discard);
           Sort(sortby, player2.hand);
           player2.SetPlayerTexture(tile);
           state = 1;
-          Window_Draw_all(window, player1, player2, turn, naki, cmtt, tex);
+          Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                          countdowntimer);
         }
         break;
       // waiting period
@@ -246,8 +278,9 @@ int main() {
         // time > 0
         if (duration > 0) {
           duration -= countdowntime.asSeconds();
-          tex.setString(std::to_string((int)duration));
-          Window_Draw_all(window, player1, player2, turn, naki, cmtt, tex);
+          countdowntimer.setString(std::to_string((int)duration));
+          Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                          countdowntimer);
           // time < 0
         } else if (duration <= 0) {
           // player1 discard wait
@@ -268,7 +301,8 @@ int main() {
           // reset duration
           duration = 1.0f;
         }
-        Window_Draw_all(window, player1, player2, turn, naki, cmtt, tex);
+        Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                        countdowntimer);
         break;
       // check naki
       case 2:
@@ -277,20 +311,20 @@ int main() {
           state = 1;
           wall.DrawCard(player2.hand);
           player2.SetPlayerTexture(tile);
-          Window_Draw_all(window, player1, player2, turn, naki, cmtt, tex);
+          Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                          countdowntimer);
           turn.turn++;
           // player1 check is winning or meld
         } else if (turn.turn == 1) {
           // win check(ron)
-          if (cw.Win(player1, player2)) state = -1;
-          // combined check
-          else {
-            naki.Check(player2.river, player1);
+          if (cw.Win(player1, player2)) {
+            state = -1;
+            // combined check
+          } else {
+            naki.CheckChiPongBigKang(player2.river, player1);
             // has combined
             if (naki.hascombined) {
-              // reset player_select
-              player_select = 0;
-              // set state to 3 to naki
+              // set state to 3 to naki select
               state = 3;
               // show naki
               naki.SetNakiTextureShow();
@@ -301,12 +335,24 @@ int main() {
               // drawcard for player1
               wall.DrawCard(player1.hand);
               player1.SetPlayerTexture(tile);
-              Window_Draw_all(window, player1, player2, turn, naki, cmtt, tex);
-              // set gameturn to 0(player1 dicard)
-              turn.turn--;
+
+              Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                              countdowntimer);
               // check win(tsumo)
               if (cw.Win(player1, player2)) {
                 state = -1;
+              } else {
+                kang_type = naki.CheckSmallAndConcealedKang(player1);
+                if (kang_type != 0) {
+                  state = 3;
+                  naki.SetNakiTextureShow();
+                  Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                                  countdowntimer);
+                } else {
+                  state = 0;
+                  // set gameturn to 0(player1 dicard)
+                  turn.turn--;
+                }
               }
             }
           }
@@ -315,25 +361,36 @@ int main() {
       // make combined
       case 5:
         if (turn.turn == 1) {
-          switch (player_select) {
+          switch (naki_select) {
             case 1:  // chi
-              player1.Chi_Combined(naki.probablysequence[0], player2.river);
+              if (chi_select != 0) {
+                if (chi_select == 1) {  // chi first
+                  player1.Chi_Combined(naki.probablysequence[0], player2.river);
+                } else if (chi_select == 2) {  // chi second
+                  player1.Chi_Combined(naki.probablysequence[1], player2.river);
+                } else if (chi_select == 3) {  // chi third
+                  player1.Chi_Combined(naki.probablysequence[2], player2.river);
+                }
+              } else {
+                player1.Chi_Combined(naki.probablysequence[0], player2.river);
+              }
               break;
             case 2:  // pong
               player1.Pong_Combined(player2.river);
               break;
             case 3:  // kang
-              player1.Big_Kang_Combined(player2.river, wall.hand,
-                                        wall.walltailtop);
-              break;
-            case 11:  // chi first
-              player1.Chi_Combined(naki.probablysequence[0], player2.river);
-              break;
-            case 12:  // chi second
-              player1.Chi_Combined(naki.probablysequence[1], player2.river);
-              break;
-            case 13:  // chi third
-              player1.Chi_Combined(naki.probablysequence[2], player2.river);
+              switch (kang_type) {
+                case 1:  // big
+                  player1.BigKangCombined(player2.river, wall);
+                  break;
+                case 2:  // concealed
+                  player1.ConcealedKangCombined(naki.themeldone, wall);
+                  break;
+                case 3:  // small
+                  player1.SmallKangCombined(naki.themeldone, naki.whitchmeld,
+                                            wall);
+                  break;
+              }
               break;
           }
           player1.SetPlayerTexture(tile);
@@ -341,14 +398,16 @@ int main() {
           naki.ClearNaki();
           naki.SetNakiTextureShow();
           cmtt.SetChiTexture(tile, naki.probablysequence);
-          Window_Draw_all(window, player1, player2, turn, naki, cmtt, tex);
-          player_select = 0;
+
+          Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                          countdowntimer);
+
           state = 0;
           turn.turn--;
         }
         break;
     }
-    Window_Draw_all(window, player1, player2, turn, naki, cmtt, tex);
+    Window_Draw_all(window, player1, player2, turn, naki, cmtt, countdowntimer);
   }
   return 0;
 }
