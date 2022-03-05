@@ -129,19 +129,6 @@ class Player {
       this->river18.setPosition(riverx + 160, rivery + 126);
       this->river19.setPosition(riverx + 192, rivery + 126);
       this->river20.setPosition(riverx + 224, rivery + 126);
-      // set meld position (750,530)
-      /*
-   this->meld11.setPosition(meldx, meldy + 40);
-   this->meld12.setPosition(meldx - 29, meldy);
-   this->meld13.setPosition(meldx + 41, meldy);
-   this->meld14.setPosition(meldx - 58, meldy);
-   this->meld21.setPosition(meldx, meldy - 5);
-   this->meld22.setPosition(meldx - 29, meldy - 45);
-   this->meld23.setPosition(meldx + 41, meldy - 45);
-   this->meld24.setPosition(meldx - 58, meldy - 45);
-   // meld rotate
-   this->meld11.setRotation(-90);
-   this->meld21.setRotation(-90);*/
       // player2
     } else if (this->code == 1) {
       // hand position
@@ -221,9 +208,9 @@ class Player {
   // set meld original position function
   void SetMeldOriginalPosition(float x, float y) {
     this->meld1.OriginalAndConcealedKangPosition(x, y);
-    this->meld2.OriginalAndConcealedKangPosition(x, y - 45);
-    this->meld3.OriginalAndConcealedKangPosition(x, y - 90);
-    this->meld4.OriginalAndConcealedKangPosition(x, y - 135);
+    this->meld2.OriginalAndConcealedKangPosition(x, y - 57);
+    this->meld3.OriginalAndConcealedKangPosition(x, y - 114);
+    this->meld4.OriginalAndConcealedKangPosition(x, y - 171);
   };
 
   // set player texture function
@@ -660,7 +647,7 @@ class Player {
       wall.hand.erase(wall.hand.end() - 2);
     } else {
       this->hand.push_back(wall.hand.back());
-      wall.hand.erase(wall.hand.end());
+      wall.hand.erase(wall.hand.end()-1);
     }
     wall.walltailtop = !wall.walltailtop;
   };
@@ -702,6 +689,7 @@ class Player {
     switch (whitchmeld) {
       case 1:
         this->meld1.hand.push_back(themeldone);
+        this->meld1.SmallKangPosition();
         this->meld1.typeofnaki = "small";
         break;
       case 2:

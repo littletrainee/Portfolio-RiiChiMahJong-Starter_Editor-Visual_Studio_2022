@@ -37,12 +37,14 @@ class Meld {
   // set small kang position function
   void SmallKangPosition() {
     this->position[3].first = this->position[0].first;
-    this->position[3].second -= 25;
+    this->meld4.setRotation(-90);
+    this->position[3].second += 12;
   };
 
   // set sprite
   void SetTexture(Tile &t) {
     std::string blank = "";
+    std::string tileback = "back";
     this->meld1.setPosition(this->position[0].first, this->position[0].second);
     this->meld2.setPosition(this->position[1].first, this->position[1].second);
     this->meld3.setPosition(this->position[2].first, this->position[2].second);
@@ -50,11 +52,16 @@ class Meld {
     if (!this->hand.empty()) {
       t.SwitchTexture(this->hand[0], this->meld1);
       t.SwitchTexture(this->hand[1], this->meld2);
-      t.SwitchTexture(this->hand[2], this->meld3);
-      if (this->hand.size() > 3)
-        t.SwitchTexture(this->hand[3], this->meld4);
-      else
-        t.SwitchTexture(blank, this->meld4);
+      if (this->typeofnaki == "concealed") {
+        t.SwitchTexture(tileback, this->meld3);
+        t.SwitchTexture(tileback, this->meld4);
+      } else {
+        t.SwitchTexture(this->hand[2], this->meld3);
+        if (this->hand.size() > 3)
+          t.SwitchTexture(this->hand[3], this->meld4);
+        else
+          t.SwitchTexture(blank, this->meld4);
+      }
     } else {
       t.SwitchTexture(blank, this->meld1);
       t.SwitchTexture(blank, this->meld2);

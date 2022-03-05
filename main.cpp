@@ -122,17 +122,20 @@ int main() {
   player2.name = "player2";
   player1.bookmaker = true;
   // set up player and wall
-  // SetUp(player1, player2, wall, sortby);
+   SetUp(player1, player2, wall, sortby);
   ////////////////////// test data ////////////////////////////////////////////
-  /*   */ player1.hand = {"2m", "2m", "2m", "3m", "3m", "3m",
-                          "4m", "4m", "4m", "5m", "5m"};
-  /*   */ player1.meld1.hand = {"1m", "1m", "1m"};
-  /*   */ player1.river = {"3z", "3z", "4z"};
-  /*   */ player1.meldorder = 1;
-  /*   */ player2.hand = {"6m", "6m", "6m", "7m", "7m", "7m", "8m",
-                          "8m", "8m", "9m", "9m", "9m", "1z"};
-  /*   */ player2.river = {"2z", "2z"};
-  /*   */ wall.hand = {"2z", "1m", "3m", "5m", "6z"};
+  ///*   */ player1.hand = {
+  //    "1m", "1m", "1m", "1m", "2m", "2m", "2m",
+  //    "3m", "3m", "3m", "4m", "4m", "4m", "5m",
+  //};
+  ///*   */  // player1.meld1.hand = {};
+  ///*   */  // player1.river = {"3z", "3z", "4z"};
+  ///*   */  // player1.meldorder = 1;
+  ///*   */ player2.hand = {"6m", "6m", "6m", "7m", "7m", "7m", "8m",
+  //                        "8m", "8m", "9m", "9m", "9m", "1z"};
+  ///*   */ player2.river = {"2z", "2z"};
+  ///*   */ wall.hand = {"1m", "3m", "5z", "1m", "5z", "6z", "2z",
+  //                     "4z", "3z", "4m", "5m", "2m", "3m"};
   /*   */
   /*   */
   /*   */
@@ -148,11 +151,20 @@ int main() {
   player1.SetPlayerTexture(tile);
   player2.SetPlayerTexture(tile);
   // check win(tsumo)
-  // if (cw.Win(player1, player2)) {
-  //  state = -1;
-  //  // no win(tsumo) then check kang
-  //} else {
-  //}
+  if (cw.Win(player1, player2)) {
+    state = -1;
+    Window_Draw_all(window, player1, player2, turn, naki, cmtt, countdowntimer);
+    // no win(tsumo) then check kang
+  } else {
+    kang_type = naki.CheckSmallAndConcealedKang(player1);
+    if (kang_type != 0) {
+      state = 3;
+      turn.turn = 1;
+      naki.SetNakiTextureShow();
+      Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                      countdowntimer);
+    }
+  }
   while (window.isOpen()) {
     countdowntime = clock.restart();
     while (window.pollEvent(event)) {
@@ -214,8 +226,6 @@ int main() {
                       break;
                     case 3:  // kang
                       state = 5;
-                      if (kang_type == 0)
-                      kang_type = 1;
                       break;
                     case -1:
                       // reset naki
@@ -319,30 +329,37 @@ int main() {
           // win check(ron)
           if (cw.Win(player1, player2)) {
             state = -1;
+            Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                            countdowntimer);
             // combined check
           } else {
             naki.CheckChiPongBigKang(player2.river, player1);
             // has combined
             if (naki.hascombined) {
+              if (naki.quadruple) {
+                kang_type = naki.CheckSmallAndConcealedKang(player1);
+                // if kang_type = 0 mean big kang set kan_type to 1
+                if (kang_type == 0) kang_type = 1;
+              }
               // set state to 3 to naki select
               state = 3;
               // show naki
               naki.SetNakiTextureShow();
               // no combined
             } else {
-              // set state to 0
-              state = 0;
               // drawcard for player1
               wall.DrawCard(player1.hand);
               player1.SetPlayerTexture(tile);
-
               Window_Draw_all(window, player1, player2, turn, naki, cmtt,
                               countdowntimer);
               // check win(tsumo)
               if (cw.Win(player1, player2)) {
                 state = -1;
+                Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                                countdowntimer);
               } else {
                 kang_type = naki.CheckSmallAndConcealedKang(player1);
+                // if kang_type != 0 meanning have concealed or small kang
                 if (kang_type != 0) {
                   state = 3;
                   naki.SetNakiTextureShow();
@@ -374,9 +391,29 @@ int main() {
               } else {
                 player1.Chi_Combined(naki.probablysequence[0], player2.river);
               }
+              player1.SetPlayerTexture(tile);
+              player2.SetPlayerTexture(tile);
+              naki.ClearNaki();
+              naki.SetNakiTextureShow();
+              cmtt.SetChiTexture(tile, naki.probablysequence);
+              Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                              countdowntimer);
+
+              state = 0;
+              turn.turn--;
               break;
             case 2:  // pong
               player1.Pong_Combined(player2.river);
+              player1.SetPlayerTexture(tile);
+              player2.SetPlayerTexture(tile);
+              naki.ClearNaki();
+              naki.SetNakiTextureShow();
+              cmtt.SetChiTexture(tile, naki.probablysequence);
+              Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                              countdowntimer);
+
+              state = 0;
+              turn.turn--;
               break;
             case 3:  // kang
               switch (kang_type) {
@@ -391,19 +428,36 @@ int main() {
                                             wall);
                   break;
               }
+              if (cw.Win(player1, player2)) {
+                state = -1;
+                Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                                countdowntimer);
+              } else {
+                naki.ClearNaki();
+                kang_type = naki.CheckSmallAndConcealedKang(player1);
+                if (naki.hascombined) {
+                  player1.SetPlayerTexture(tile);
+                  player2.SetPlayerTexture(tile);
+                  state = 3;
+                  naki.SetNakiTextureShow();
+                  Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                                  countdowntimer);
+                  break;
+                } else {
+                  player1.SetPlayerTexture(tile);
+                  player2.SetPlayerTexture(tile);
+                  naki.ClearNaki();
+                  naki.SetNakiTextureShow();
+                  cmtt.SetChiTexture(tile, naki.probablysequence);
+                  Window_Draw_all(window, player1, player2, turn, naki, cmtt,
+                                  countdowntimer);
+
+                  state = 0;
+                  turn.turn--;
+                }
+              }
               break;
           }
-          player1.SetPlayerTexture(tile);
-          player2.SetPlayerTexture(tile);
-          naki.ClearNaki();
-          naki.SetNakiTextureShow();
-          cmtt.SetChiTexture(tile, naki.probablysequence);
-
-          Window_Draw_all(window, player1, player2, turn, naki, cmtt,
-                          countdowntimer);
-
-          state = 0;
-          turn.turn--;
         }
         break;
     }

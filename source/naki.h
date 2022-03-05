@@ -14,6 +14,7 @@ class Naki {
   // delcare
   std::vector<std::vector<std::string>> probablysequence;
   bool hascombined = false;
+  bool quadruple = false;
   std::string themeldone;
   int whitchmeld = 0;
   // load naki texture
@@ -65,6 +66,7 @@ class Naki {
       if (std::count(player.hand.begin(), player.hand.end(), *target) == 4) {
         this->quadruple = true;
         this->themeldone = *target;
+        this->hascombined = true;
         return 2;
         // check small kang
       } else {
@@ -75,30 +77,34 @@ class Naki {
           this->quadruple = true;
           this->themeldone = *target;
           this->whitchmeld = 1;
+          this->hascombined = true;
           return 3;
-        // meld2
+          // meld2
         } else if (player.meld2.hand.size() != 0 &&
                    std::count(player.meld2.hand.begin(),
                               player.meld2.hand.end(), *target) == 3) {
           this->quadruple = true;
           this->themeldone = *target;
           this->whitchmeld = 2;
+          this->hascombined = true;
           return 3;
-        // meld3
+          // meld3
         } else if (player.meld3.hand.size() != 0 &&
                    std::count(player.meld3.hand.begin(),
                               player.meld3.hand.end(), *target) == 3) {
           this->quadruple = true;
           this->themeldone = *target;
           this->whitchmeld = 3;
+          this->hascombined = true;
           return 3;
-        // meld4
+          // meld4
         } else if (player.meld4.hand.size() != 0 &&
                    std::count(player.meld4.hand.begin(),
                               player.meld4.hand.end(), *target) == 3) {
           this->quadruple = true;
           this->themeldone = *target;
           this->whitchmeld = 4;
+          this->hascombined = true;
           return 3;
         }
       }
@@ -157,13 +163,13 @@ class Naki {
     this->triple = false;
     this->quadruple = false;
     this->themeldone.clear();
+    this->hascombined = false;
   };
 
  private:
   // declare
   // bool
   bool triple = false;
-  bool quadruple = false;
   // std::string
   std::string riverlastone;
   // std::vector<T>
